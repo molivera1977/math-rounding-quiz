@@ -16,8 +16,8 @@
 /* ── CONFIG ─────────────────────────────────────────── */
 // Each form opens on its own. false = students locked out of that form;
 // Teacher Access still works. Set true to open.
-const REVIEW_OPEN   = false;   // Form A — Review
-const QUIZ_OPEN     = false;   // Form B — Official Quiz
+const REVIEW_OPEN   = true;    // Form A — Review
+const QUIZ_OPEN     = true;    // Form B — Official Quiz
 const INSTRUCT_SECS = 20;
 const READ_SECS     = 12;
 const NEXT_SECS     = 8;
