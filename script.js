@@ -6,6 +6,8 @@
      two tries (review-site standard), then the Teacher PIN unlocks more
    - Form B = the OFFICIAL QUIZ — one attempt, right/wrong only, then
      locked; a retake (Form B again, reshuffled) needs the Teacher PIN
+   - The quiz opens only after the review is finished at least once
+     (Teacher PIN can skip that for one student)
    - Same skill in the same slot on both forms, so the dashboard
      compares review → quiz skill by skill
    PIN: 9377 (Teacher override)
@@ -308,16 +310,25 @@ function quizCompleted(name) {
   return getFormAttempts(name).B > 0;
 }
 
+/* The official quiz waits until the review has been FINISHED at least once
+   on this device (Marcos 10/5). An unfinished review does not count. */
+function reviewFinished(name) {
+  return getFormAttempts(name).A > 0;
+}
+
 /* A form that is not open yet shows a gray "Not open yet" button. */
-function setFormButton(form, label, sub) {
+function setFormButton(form, label, sub, waiting) {
   const btn = document.getElementById('btn-form-' + form);
   if (!btn) return;
   const open = formOpen(form);
   btn.disabled = !open;
-  btn.classList.toggle('locked', !open);
-  btn.innerHTML = open
-    ? `${label}<span class="form-btn-sub">${sub}</span>`
-    : `🔒 ${label.replace(/^\S+\s/, '')}<span class="form-btn-sub">Not open yet</span>`;
+  // "waiting" = open but not yet earned: looks locked, still tappable so it can explain why
+  btn.classList.toggle('locked', !open || !!waiting);
+  btn.innerHTML = !open
+    ? `🔒 ${label.replace(/^\S+\s/, '')}<span class="form-btn-sub">Not open yet</span>`
+    : waiting
+      ? `🔒 ${label.replace(/^\S+\s/, '')}<span class="form-btn-sub">${waiting}</span>`
+      : `${label}<span class="form-btn-sub">${sub}</span>`;
 }
 
 function applyFormLocks(name) {
@@ -332,7 +343,8 @@ function applyFormLocks(name) {
     : '🔒 2/2 attempts used · Teacher PIN for more');
   const revBtn = document.getElementById('btn-form-A');
   if (revBtn && formOpen('A') && a.A >= 2) revBtn.classList.add('locked');
-  setFormButton('B', '📝 Take the Official Quiz (Form B)', '20 questions · one try');
+  setFormButton('B', '📝 Take the Official Quiz (Form B)', '20 questions · one try',
+    reviewFinished(name) ? '' : 'Finish the Review (Form A) first');
   if (startCard) startCard.classList.toggle('hidden', done);
   if (doneCard)  doneCard.classList.toggle('hidden', !done || retakeUnlocked);
   if (retake)    retake.classList.toggle('hidden', !retakeUnlocked);
@@ -576,6 +588,16 @@ const app = {
     if (!this.studentName || (form !== 'A' && form !== 'B') || !formOpen(form)) return;
     // The official quiz is one try — a finished one needs a Teacher-PIN retake
     if (form === 'B' && quizCompleted(this.studentName)) { applyFormLocks(this.studentName); return; }
+    // The quiz waits for one finished review; the Teacher PIN can skip that
+    if (form === 'B' && !reviewFinished(this.studentName)) {
+      this.showPinModal(
+        '📘 Review First',
+        `${getFirstName(this.studentName)}, finish the Review (Form A) before you take the official quiz. ` +
+        `Teachers: enter your PIN to let this student skip the review.`,
+        () => this.startSession('B')
+      );
+      return;
+    }
     // The review is two tries; each extra try needs the Teacher PIN
     if (form === 'A' && getFormAttempts(this.studentName).A >= 2) {
       this.showPinModal(
