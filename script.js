@@ -406,9 +406,11 @@ function speakReadAloudIntro() {
     const parts = [];
     el.querySelectorAll('.wrd').forEach(sp => {
       const t = sp.textContent.replace(/\uFE0F/g, '').trim();
-      const say = INTRO_SAY[t] != null ? INTRO_SAY[t] : (/[A-Za-z0-9]/.test(t) ? t : '');
+      const key = t.replace(/[.!?,]+$/, ''), punct = t.slice(key.length);   // "🔊." → icon + "."
+      let say = INTRO_SAY[key] != null ? INTRO_SAY[key] + punct : (/[A-Za-z0-9]/.test(t) ? t : '');
       if (!say) return;
       if (say === ',') { if (parts.length) parts[parts.length - 1] += ','; return; }
+      if (/^the /.test(say) && /^(every|each)$/i.test(parts[parts.length - 1] || '')) say = say.slice(4);
       spans.push(sp);
       say.split(' ').forEach(w => { parts.push(w); words.push(w); wordSpan.push(sp); });
     });
