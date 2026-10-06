@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rounding Quiz: Round Whole Numbers to Any Place</title>
-  <link rel="stylesheet" href="style.css?v=rq1" />
+  <link rel="stylesheet" href="style.css?v=rq2" />
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
@@ -22,7 +22,7 @@
     <div id="welcome-panel" style="text-align:center;padding:10px 0 24px;">
       <p style="font-size:1.05rem;color:#777;margin:0 auto 28px;max-width:400px;line-height:1.8;">
         Where do you look? Round up or round down? What happens to the other digits?<br>
-        Practice first, then show what you know on the quiz!
+        Review first, then show what you know on the quiz!
       </p>
       <button class="lgs-btn" onclick="app.showReadAloudIntro()">🚀 Let's Get Started!</button>
       <div style="text-align:right;margin-top:10px;">
@@ -76,14 +76,14 @@
         </div>
       </div>
 
-      <!-- STEP 2 — PRACTICE (Form A) + THE OFFICIAL QUIZ (Form B; Teacher-PIN retakes) -->
+      <!-- STEP 2 — REVIEW (Form A) + THE OFFICIAL QUIZ (Form B; Teacher-PIN retakes) -->
       <div id="form-select-section" class="hidden">
 
-        <!-- Practice — never locks -->
-        <div class="step-card" id="practice-card">
-          <span class="step-label">Step 2 — Practice</span>
+        <!-- Review — 2 tries, then Teacher PIN -->
+        <div class="step-card" id="review-card">
+          <span class="step-label">Step 2 — Review</span>
           <div class="start-grid">
-            <button class="start-btn practice-btn" id="btn-form-A" onclick="app.attemptStart('A')">📘 Practice (Form A)<span class="form-btn-sub">20 questions · practice as many times as you want</span></button>
+            <button class="start-btn review-btn" id="btn-form-A" onclick="app.attemptStart('A')">📘 Review (Form A)<span class="form-btn-sub">20 questions · 2 tries</span></button>
           </div>
           <p class="form-note">You will see the right answer and <strong>why</strong> after every question.</p>
         </div>
@@ -116,7 +116,7 @@
 
         <div style="background:#f0f4ff;border:2px solid #a9c4f5;border-radius:12px;
                      padding:12px 16px;margin-bottom:12px;font-size:0.88rem;color:#2c3e50;line-height:1.6;">
-          📋 <strong>Rules:</strong> Practice as many times as you want.
+          📋 <strong>Rules:</strong> You get 2 tries on the review.
           You take the <strong>official quiz one time</strong>. After you finish, it locks.
           Only your teacher can unlock a retake.
         </div>
@@ -182,9 +182,9 @@
     <div class="dir-section form-dir">
       <div class="dir-row">
         <button class="speak-btn" onclick="speakDir(this)">🔊</button>
-        <h3 style="margin:0;">📘 Step 2 — Practice (Form A)</h3>
+        <h3 style="margin:0;">📘 Step 2 — Review (Form A)</h3>
       </div>
-      <p class="dir-text">Practice has 20 questions about rounding. After each answer you will see the right answer and why. You can practice as many times as you want.</p>
+      <p class="dir-text">The review has 20 questions about rounding. After each answer you will see the right answer and why. You get 2 tries on the review.</p>
     </div>
 
     <div class="dir-section attempts-dir">
@@ -301,7 +301,7 @@
       <div id="missed-items"></div>
     </div>
     <div class="end-btns">
-      <button class="start-btn" id="end-again-btn" onclick="app.tryAgain()">↩️ Back to Practice &amp; Quiz</button>
+      <button class="start-btn" id="end-again-btn" onclick="app.tryAgain()">↩️ Back to Review &amp; Quiz</button>
       <button class="start-btn" style="background:#27ae60;box-shadow:0 5px 0 #1e8449;" onclick="app.restart()">🏠 Home</button>
     </div>
     <div id="review-next-btn" class="hidden" style="text-align:center;margin-top:12px;">
@@ -365,9 +365,9 @@
 
 </div><!-- /.container -->
 
-<script src="data/form_a.js?v=rq1"></script>
-<script src="data/form_b.js?v=rq1"></script>
-<script src="data/skills.js?v=rq1"></script>
-<script src="script.js?v=rq1"></script>
+<script src="data/form_a.js?v=rq2"></script>
+<script src="data/form_b.js?v=rq2"></script>
+<script src="data/skills.js?v=rq2"></script>
+<script src="script.js?v=rq2"></script>
 </body>
 </html>

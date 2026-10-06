@@ -3,8 +3,8 @@
    Saved with every missed question so the teacher
    dashboard can rank skills (Focus next / Strongest).
    Every skill rolls up to 4.NBT.3 (round multi-digit numbers).
-   Form A (practice) and Form B (quiz) use the same skill in
-   the same slot, so practice → quiz compares skill by skill.
+   Form A (review) and Form B (quiz) use the same skill in
+   the same slot, so review → quiz compares skill by skill.
 ═══════════════════════════════════════════════════════ */
 window.SKILLS = {
   A01: "Which digit to look at",

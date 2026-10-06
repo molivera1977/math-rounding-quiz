@@ -111,10 +111,10 @@ h1 {
 
 .form-btn-sub { font-size: 0.65em; font-weight: normal; opacity: 0.88; }
 
-/* Rounding Quiz — Form A practice reads as practice (blue), the quiz keeps the orange */
-.start-btn.practice-btn { background: #2e86c1; box-shadow: 0 5px 0 #1f618d; }
-.start-btn.practice-btn:hover { box-shadow: 0 8px 0 #1f618d; }
-#practice-card .step-label { color: #2e86c1; }
+/* Rounding Quiz — Form A review reads as review (blue), the quiz keeps the orange */
+.start-btn.review-btn { background: #2e86c1; box-shadow: 0 5px 0 #1f618d; }
+.start-btn.review-btn:hover { box-shadow: 0 8px 0 #1f618d; }
+#review-card .step-label { color: #2e86c1; }
 .form-note { margin: 4px 0 0; text-align: center; font-size: 0.86rem; color: #555; }
 
 .score-btn {

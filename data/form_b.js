@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════
    FORM B — THE OFFICIAL QUIZ (one attempt; right/wrong only)
    Same skill in the same slot as Form A (B01 ↔ A01 …), so the
-   dashboard compares practice → quiz skill by skill.
+   dashboard compares review → quiz skill by skill.
    A Teacher-PIN retake gives Form B again, reshuffled.
 ═══════════════════════════════════════════════════════ */
 window.FORM_B = [

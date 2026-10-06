@@ -2,19 +2,19 @@
    ROUNDING QUIZ · script.js
    Built on the Math Module 1 Test engine (the review-site standard),
    one site with two forms:
-   - Form A = PRACTICE — the answer + explanation after every question,
-     practice as many times as you want
+   - Form A = REVIEW — the answer + explanation after every question;
+     two tries (review-site standard), then the Teacher PIN unlocks more
    - Form B = the OFFICIAL QUIZ — one attempt, right/wrong only, then
      locked; a retake (Form B again, reshuffled) needs the Teacher PIN
    - Same skill in the same slot on both forms, so the dashboard
-     compares practice → quiz skill by skill
+     compares review → quiz skill by skill
    PIN: 9377 (Teacher override)
 ═══════════════════════════════════════════════════════ */
 
 /* ── CONFIG ─────────────────────────────────────────── */
 // Each form opens on its own. false = students locked out of that form;
 // Teacher Access still works. Set true to open.
-const PRACTICE_OPEN = false;   // Form A — Practice
+const REVIEW_OPEN   = false;   // Form A — Review
 const QUIZ_OPEN     = false;   // Form B — Official Quiz
 const INSTRUCT_SECS = 20;
 const READ_SECS     = 12;
@@ -28,10 +28,10 @@ const SESSION_ID = (() => {
   return id;
 })();
 
-const isPractice = form => form === 'A';
-function formOpen(form) { return isPractice(form) ? PRACTICE_OPEN : QUIZ_OPEN; }
+const isReview = form => form === 'A';
+function formOpen(form) { return isReview(form) ? REVIEW_OPEN : QUIZ_OPEN; }
 /* Sheet / dashboard game key — one per form */
-function gameKey(form) { return isPractice(form) ? 'rounding-practice' : 'rounding-quiz'; }
+function gameKey(form) { return isReview(form) ? 'rounding-review' : 'rounding-quiz'; }
 
 /* ── SHEET SUBMISSION ───────────────────────────────── */
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzv8CWv1yyi8NeH04now9UxVL4IZm5yMqqsEGMcgGdrcAOWVB-aSp5siTvSSJXIUpzFMA/exec';
@@ -49,9 +49,9 @@ function missEntry(m) {
   return `[${m.id}] (${skill}) ${m.q}${picked}`;
 }
 
-/* Form A is practice; Form B is the official quiz — a second Form B is a retake. */
+/* Form A is the review; Form B is the official quiz — a second Form B is a retake. */
 function formLabel(attempt) {
-  if (isPractice(app.currentForm)) return 'Form A — Practice';
+  if (isReview(app.currentForm)) return 'Form A — Review';
   return (attempt || 1) > 1 ? 'Form B — Retake' : 'Form B — Official Quiz';
 }
 /* The attempt this session will be once it finishes (finished ones on this device + 1). */
@@ -302,7 +302,8 @@ function getFormAttempts(name) {
 
 /* The official quiz (Form B) is one attempt. Once it is finished on this
    device the student sees "Quiz Already Completed"; a retake needs the
-   Teacher PIN every time. Practice (Form A) never locks. */
+   Teacher PIN every time. The review (Form A) gets two tries, then a
+   Teacher PIN unlocks each extra try (same as the MM1 Review). */
 function quizCompleted(name) {
   return getFormAttempts(name).B > 0;
 }
@@ -325,8 +326,12 @@ function applyFormLocks(name) {
   const startCard = document.getElementById('quiz-start-card');
   const doneCard  = document.getElementById('completed-container');
   const retake    = document.getElementById('retake-card');
-  setFormButton('A', '📘 Practice (Form A)',
-    a.A ? `Practiced ${a.A}× · 20 questions` : '20 questions · practice as many times as you want');
+  setFormButton('A', '📘 Review (Form A)',
+    a.A === 0 ? '20 questions · 2 tries'
+    : a.A === 1 ? '🔁 Attempt 2 available'
+    : '🔒 2/2 attempts used · Teacher PIN for more');
+  const revBtn = document.getElementById('btn-form-A');
+  if (revBtn && formOpen('A') && a.A >= 2) revBtn.classList.add('locked');
   setFormButton('B', '📝 Take the Official Quiz (Form B)', '20 questions · one try');
   if (startCard) startCard.classList.toggle('hidden', done);
   if (doneCard)  doneCard.classList.toggle('hidden', !done || retakeUnlocked);
@@ -456,7 +461,7 @@ const app = {
 
   /* ── READ ALOUD INTRO ── */
   showReadAloudIntro() {
-    if (!PRACTICE_OPEN && !QUIZ_OPEN) return;
+    if (!REVIEW_OPEN && !QUIZ_OPEN) return;
     document.getElementById('welcome-panel').classList.add('hidden');
     this.show('readaloud-screen');
     const btn   = document.getElementById('readaloud-btn');
@@ -571,6 +576,15 @@ const app = {
     if (!this.studentName || (form !== 'A' && form !== 'B') || !formOpen(form)) return;
     // The official quiz is one try — a finished one needs a Teacher-PIN retake
     if (form === 'B' && quizCompleted(this.studentName)) { applyFormLocks(this.studentName); return; }
+    // The review is two tries; each extra try needs the Teacher PIN
+    if (form === 'A' && getFormAttempts(this.studentName).A >= 2) {
+      this.showPinModal(
+        '🔓 Unlock the Review',
+        `${getFirstName(this.studentName)} has already used both tries on the review. Enter Teacher PIN to allow an extra try.`,
+        () => this.startSession('A')
+      );
+      return;
+    }
     this.startSession(form);
   },
 
@@ -601,7 +615,7 @@ const app = {
   },
 
   _showReviewPicker() {
-    const form = prompt('Choose a form to review:\n1 — Form A (Practice)\n2 — Form B (Official Quiz)\n\nEnter 1 or 2:');
+    const form = prompt('Choose a form to review:\n1 — Form A (Review)\n2 — Form B (Official Quiz)\n\nEnter 1 or 2:');
     const map = { '1': 'A', '2': 'B' };
     if (!map[form]) { alert('Invalid choice.'); reviewMode = false; return; }
     const mode = prompt('Choose review mode:\n1 — Manual (tap Next each question)\n2 — Auto-run (fully automatic)\n\nEnter 1 or 2:');
@@ -682,7 +696,7 @@ const app = {
       if (this.studentName && data.studentName === this.studentName) {
         rc.classList.remove('hidden');
         document.getElementById('resume-detail').textContent =
-          `${data.currentForm === 'A' ? 'Practice (Form A)' : 'Official Quiz (Form B)'} — Q${data.currentIndex + 1} of ${data.currentBank.length}`;
+          `${data.currentForm === 'A' ? 'Review (Form A)' : 'Official Quiz (Form B)'} — Q${data.currentIndex + 1} of ${data.currentBank.length}`;
         if (formSelect) formSelect.classList.add('hidden');
       } else {
         rc.classList.add('hidden');
@@ -1018,10 +1032,10 @@ const app = {
       this.missedQuestions.push({ id: q.id, q: q.q, skill: (window.SKILLS || {})[q.id], yourAnswer: this.selectedAnswer, correct: q.answer, explanation: q.explanation || '' });
     }
 
-    // Practice (Form A) teaches: the right answer + why, every time.
+    // The review (Form A) teaches: the right answer + why, every time.
     // Official quiz (Form B): mark only the student's own pick — the right
     // answer is never shown (the teacher's review mode still sees it).
-    const teach = isPractice(this.currentForm) || reviewMode;
+    const teach = isReview(this.currentForm) || reviewMode;
     document.querySelectorAll('.answer-btn').forEach(btn => {
       btn.disabled = true;
       if (btn.dataset.answer === this.selectedAnswer) btn.classList.add(correct ? 'correct' : 'incorrect');
@@ -1137,7 +1151,7 @@ const app = {
     const againBtn = document.getElementById('end-again-btn');
     if (againBtn) againBtn.classList.toggle('hidden', reviewMode);
     document.getElementById('end-title').textContent =
-      isPractice(this.currentForm) ? '🎉 Practice Complete!' : '🎉 Quiz Complete!';
+      isReview(this.currentForm) ? '🎉 Review Complete!' : '🎉 Quiz Complete!';
 
     document.getElementById('final-score-sub').textContent =
       `${formLabel(attemptNum)}${attemptNum > 1 ? ' · Attempt ' + attemptNum : ''} · ${this.studentName}`;
@@ -1148,8 +1162,8 @@ const app = {
     setTimeout(() => pctEl.classList.add('revealed'), 50);
 
     const missedSec = document.getElementById('missed-section');
-    // Practice shows the fix for every miss; the official quiz shows the pick only.
-    const showFix = isPractice(this.currentForm) || reviewMode;
+    // The review shows the fix for every miss; the official quiz shows the pick only.
+    const showFix = isReview(this.currentForm) || reviewMode;
     if (this.missedQuestions.length) {
       missedSec.classList.remove('hidden');
       document.getElementById('missed-items').innerHTML =
@@ -1533,7 +1547,7 @@ app.init();
 
 /* ── CLOSED-TO-STUDENTS LOCK ────────────────────────── */
 (function applyReviewLock() {
-  if (PRACTICE_OPEN || QUIZ_OPEN) return;   // either form open → students can get in
+  if (REVIEW_OPEN || QUIZ_OPEN) return;   // either form open → students can get in
   const btn = document.querySelector('.lgs-btn');
   if (!btn) return;
   btn.disabled = true;

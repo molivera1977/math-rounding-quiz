@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   FORM A — PRACTICE (answer + explanation shown after each question)
+   FORM A — REVIEW (answer + explanation shown after each question)
    A01–A11 = the mechanics of rounding (where to look, what the
    rounding digit can become, what happens to the other digits).
    A12–A17 = rounding to every place. A18–A20 = reasoning.
