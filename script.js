@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   ROUNDING QUIZ · script.js
+   ROUNDING REVIEW AND QUIZ 1 · script.js
    Built on the Math Module 1 Test engine (the review-site standard),
    one site with two forms:
    - Form A = REVIEW — the answer + explanation after every question;
@@ -1499,14 +1499,14 @@ const app = {
         </tr>`;
       })
     ).join('');
-    const html = `<html><head><title>Rounding Quiz Scores</title>
+    const html = `<html><head><title>Rounding Review and Quiz 1 Scores</title>
       <style>body{font-family:Arial;padding:20px;}h2{color:#d35400;}
       table{width:100%;border-collapse:collapse;margin-top:12px;}
       th,td{border:1px solid #ccc;padding:8px 12px;text-align:center;}
       th{background:#d35400;color:white;}
       .good{color:green;font-weight:bold;}.ok{color:orange;font-weight:bold;}.bad{color:red;font-weight:bold;}</style>
       </head><body>
-      <h2>🎯 Rounding Quiz — Score Report</h2>
+      <h2>🎯 Rounding Review and Quiz 1 — Score Report</h2>
       <p>Printed: ${new Date().toLocaleString()}</p>
       <table><tr><th>Name</th><th>Form</th><th>Attempt</th><th>Score</th><th>%</th><th>Time</th><th>Date</th></tr>${rows}</table>
       </body></html>`;
