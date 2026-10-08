@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   ROUNDING REVIEW AND QUIZ - THE MECHANICS EDITION · script.js
+   ROUNDING REVIEW AND QUIZ - MECHANICS EDITION · script.js
    Practice added 10/8 (Form P, game key rounding-practice): the digit-rule
    steps in order, opt-in 💡 hints, place-value chart. Review waits for it.
    (named "Rounding Review and Quiz 1" 10/6; renamed 10/8)
@@ -1615,14 +1615,14 @@ const app = {
         </tr>`;
       })
     ).join('');
-    const html = `<html><head><title>Rounding Review and Quiz - The Mechanics Edition Scores</title>
+    const html = `<html><head><title>Rounding Review and Quiz - Mechanics Edition Scores</title>
       <style>body{font-family:Arial;padding:20px;}h2{color:#d35400;}
       table{width:100%;border-collapse:collapse;margin-top:12px;}
       th,td{border:1px solid #ccc;padding:8px 12px;text-align:center;}
       th{background:#d35400;color:white;}
       .good{color:green;font-weight:bold;}.ok{color:orange;font-weight:bold;}.bad{color:red;font-weight:bold;}</style>
       </head><body>
-      <h2>🎯 Rounding Review and Quiz - The Mechanics Edition — Score Report</h2>
+      <h2>🎯 Rounding Review and Quiz - Mechanics Edition — Score Report</h2>
       <p>Printed: ${new Date().toLocaleString()}</p>
       <table><tr><th>Name</th><th>Form</th><th>Attempt</th><th>Score</th><th>%</th><th>Time</th><th>Date</th></tr>${rows}</table>
       </body></html>`;
