@@ -1,5 +1,7 @@
 /* ═══════════════════════════════════════════════════════
    ROUNDING REVIEW AND QUIZ - THE MECHANICS EDITION · script.js
+   Practice added 10/8 (Form P, game key rounding-practice): the digit-rule
+   steps in order, opt-in 💡 hints, place-value chart. Review waits for it.
    (named "Rounding Review and Quiz 1" 10/6; renamed 10/8)
    Built on the Math Module 1 Test engine (the review-site standard),
    one site with two forms:
@@ -17,6 +19,7 @@
 /* ── CONFIG ─────────────────────────────────────────── */
 // Each form opens on its own. false = students locked out of that form;
 // Teacher Access still works. Set true to open.
+const PRACTICE_OPEN = true;    // Practice (Marcos 10/8) — the steps, with hints
 const REVIEW_OPEN   = true;    // Form A — Review
 const QUIZ_OPEN     = true;    // Form B — Official Quiz
 const INSTRUCT_SECS = 20;
@@ -32,9 +35,13 @@ const SESSION_ID = (() => {
 })();
 
 const isReview = form => form === 'A';
-function formOpen(form) { return isReview(form) ? REVIEW_OPEN : QUIZ_OPEN; }
+const isPractice = form => form === 'P';
+// Practice and Review teach (answer + why); the official quiz does not
+const teaches = form => form !== 'B';
+const FORM_NAMES = { P: 'Practice', A: 'Review (Form A)', B: 'Official Quiz (Form B)' };
+function formOpen(form) { return isPractice(form) ? PRACTICE_OPEN : isReview(form) ? REVIEW_OPEN : QUIZ_OPEN; }
 /* Sheet / dashboard game key — one per form */
-function gameKey(form) { return isReview(form) ? 'rounding-review' : 'rounding-quiz'; }
+function gameKey(form) { return isPractice(form) ? 'rounding-practice' : isReview(form) ? 'rounding-review' : 'rounding-quiz'; }
 
 /* ── SHEET SUBMISSION ───────────────────────────────── */
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzv8CWv1yyi8NeH04now9UxVL4IZm5yMqqsEGMcgGdrcAOWVB-aSp5siTvSSJXIUpzFMA/exec';
@@ -54,6 +61,7 @@ function missEntry(m) {
 
 /* Form A is the review; Form B is the official quiz — a second Form B is a retake. */
 function formLabel(attempt) {
+  if (isPractice(app.currentForm)) return 'Practice';
   if (isReview(app.currentForm)) return 'Form A — Review';
   return (attempt || 1) > 1 ? 'Form B — Retake' : 'Form B — Official Quiz';
 }
@@ -272,6 +280,74 @@ function stopActiveSpeech() {
   if (activeSpeakBtn) { activeSpeakBtn.textContent = '🔊'; activeSpeakBtn = null; }
 }
 
+/* ── HINT BOX (Marcos 10/7) ──
+   "The hints should not play automatically. They should be there if
+   needed." Until the student taps 💡 Need a hint?, only that button shows
+   and nothing is read. Once opened, the hint has its own 🔊 on the LEFT,
+   same toggle as every other speaker (tap to play, tap to stop, tap again
+   to restart); every word (including "Hint:") is a span for the highlight.
+   The question's 🔊 reads the question only. */
+function hintBoxHTML(hint, shown) {
+  if (!shown) {
+    return `<div class="hint-wrap"><button type="button" class="hint-reveal-btn" ` +
+      `aria-label="Show a hint" onclick="event.stopPropagation(); app.showHint()">` +
+      `💡 Need a hint?</button></div>`;
+  }
+  const words = ('Hint: ' + hint).split(/\s+/)
+    .map(w => `<span class="wrd">${formatMathText(w)}</span>`).join(' ');
+  return `<div class="hint-box"><button type="button" class="speak-btn hint-speak-btn" ` +
+    `title="Read the hint aloud" aria-label="Read the hint aloud" ` +
+    `onclick="event.stopPropagation(); speakHint(this)">🔊</button>` +
+    `<span class="hint-text"><span aria-hidden="true">💡</span> ${words}</span></div>`;
+}
+
+function speakHint(btn) {
+  if (activeSpeakBtn === btn) { stopActiveSpeech(); return; }
+  stopActiveSpeech();
+  const q = app.currentBank && app.currentBank[app.currentIndex];
+  if (!q || !q.hint) return;
+  const spans = Array.from(btn.parentElement.querySelectorAll('.wrd'));
+  activeSpeakBtn = btn;
+  btn.textContent = '⏹';
+  const u = new SpeechSynthesisUtterance(convertToSpokenText('Hint: ' + q.hint));
+  u.lang = 'en-US'; u.rate = 0.92;
+  let hlIdx = 0;
+  u.onboundary = e => {
+    if (e.name !== 'word') return;
+    spans.forEach(el => el.classList.remove('hl'));
+    if (spans[hlIdx]) spans[hlIdx].classList.add('hl');
+    hlIdx++;
+  };
+  u.onend = () => {
+    spans.forEach(el => el.classList.remove('hl'));
+    if (activeSpeakBtn === btn) { btn.textContent = '🔊'; activeSpeakBtn = null; }
+  };
+  addHighlightFallback(u, spans);
+  window.speechSynthesis.speak(u);
+}
+
+/* ── PLACE-VALUE CHART (Practice, 10/8) ─────────────────
+   q.pv = { n, round: 'hundreds', roundMark: true|false, look: true|false }
+   Draws the number in digit boxes with the place name under each digit.
+   roundMark outlines the rounding place in orange ("rounding digit");
+   look outlines the digit just to its right in blue ("look here"). */
+const PV_PLACES = ['ones', 'tens', 'hundreds', 'thousands', 'ten thousands', 'hundred thousands'];
+function placeValueHTML(pv) {
+  const digits = String(pv.n).split('');
+  const k = digits.length;
+  const ri = k - 1 - PV_PLACES.indexOf(pv.round);       // index of the rounding digit
+  const cells = digits.map((d, i) => {
+    const place = PV_PLACES[k - 1 - i];
+    const isRound = pv.roundMark && i === ri, isLook = pv.look && i === ri + 1;
+    const cls = isRound ? ' pv-round' : isLook ? ' pv-look' : '';
+    const tag = isRound ? '<span class="pv-tag">rounding digit</span>' : isLook ? '<span class="pv-tag">look here</span>' : '<span class="pv-tag pv-tag-empty"></span>';
+    const comma = (k - 1 - i) % 3 === 0 && i < k - 1 ? '<span class="pv-comma">,</span>' : '';
+    return `<div class="pv-cell${cls}">${tag}<span class="pv-digit">${d}</span><span class="pv-place">${place}</span></div>${comma}`;
+  }).join('');
+  const said = digits.map((d, i) => `${d} in the ${PV_PLACES[k - 1 - i]} place`).join(', ');
+  return `<div class="pv-wrap" role="img" aria-label="Place value chart: ${said}">${cells}</div>`;
+}
+
 /* ── HIGHLIGHT FALLBACK ─────────────────────────────
    Some voices (and some browsers) never fire word-boundary
    events, so the highlight would never move. If no boundary
@@ -298,7 +374,7 @@ function addHighlightFallback(u, spans) {
 /* ── ATTEMPT TRACKING ───────────────────────────────── */
 function getFormAttempts(name) {
   const scores = JSON.parse(localStorage.getItem(SCORES_KEY) || '[]');
-  const counts = { A: 0, B: 0 };
+  const counts = { P: 0, A: 0, B: 0 };
   scores.filter(s => s.name === name && s.done).forEach(s => {
     if (counts[s.form] !== undefined) counts[s.form]++;
   });
@@ -317,6 +393,14 @@ function quizCompleted(name) {
    on this device (Marcos 10/5). An unfinished review does not count. */
 function reviewFinished(name) {
   return getFormAttempts(name).A > 0;
+}
+
+/* The practice comes first (Marcos 10/8): the review waits for a finished
+   practice — except for anyone who already finished the review or the quiz
+   before the practice existed (they keep their place). */
+function reviewReady(name) {
+  const a = getFormAttempts(name);
+  return a.P > 0 || a.A > 0 || a.B > 0;
 }
 
 /* A form that is not open yet shows a gray "Not open yet" button. */
@@ -340,12 +424,15 @@ function applyFormLocks(name) {
   const startCard = document.getElementById('quiz-start-card');
   const doneCard  = document.getElementById('completed-container');
   const retake    = document.getElementById('retake-card');
+  setFormButton('P', '🧭 Practice',
+    a.P === 0 ? '20 questions · step by step' : '🔁 Practice again any time');
   setFormButton('A', '📘 Review (Form A)',
     a.A === 0 ? '20 questions · 2 tries'
     : a.A === 1 ? '🔁 Attempt 2 available'
-    : '🔒 2/2 attempts used · Teacher PIN for more');
+    : '🔒 2/2 attempts used · Teacher PIN for more',
+    reviewReady(name) ? '' : 'Finish the Practice first');
   const revBtn = document.getElementById('btn-form-A');
-  if (revBtn && formOpen('A') && a.A >= 2) revBtn.classList.add('locked');
+  if (revBtn && formOpen('A') && reviewReady(name) && a.A >= 2) revBtn.classList.add('locked');
   setFormButton('B', '📝 Take the Official Quiz (Form B)', '20 questions · one try',
     reviewFinished(name) ? '' : 'Finish the Review (Form A) first');
   if (startCard) startCard.classList.toggle('hidden', done);
@@ -691,7 +778,17 @@ const app = {
 
   /* ── ATTEMPT START ── */
   attemptStart(form) {
-    if (!this.studentName || (form !== 'A' && form !== 'B') || !formOpen(form)) return;
+    if (!this.studentName || !['P', 'A', 'B'].includes(form) || !formOpen(form)) return;
+    // The review waits for one finished practice; the Teacher PIN can skip that
+    if (form === 'A' && !reviewReady(this.studentName)) {
+      this.showPinModal(
+        '🧭 Practice First',
+        `${getFirstName(this.studentName)}, finish the Practice before you start the review. ` +
+        `Teachers: enter your PIN to let this student skip the practice.`,
+        () => this.startSession('A')
+      );
+      return;
+    }
     // The official quiz is one try — a finished one needs a Teacher-PIN retake
     if (form === 'B' && quizCompleted(this.studentName)) { applyFormLocks(this.studentName); return; }
     // The quiz waits for one finished review; the Teacher PIN can skip that
@@ -743,8 +840,8 @@ const app = {
   },
 
   _showReviewPicker() {
-    const form = prompt('Choose a form to review:\n1 — Form A (Review)\n2 — Form B (Official Quiz)\n\nEnter 1 or 2:');
-    const map = { '1': 'A', '2': 'B' };
+    const form = prompt('Choose a form to review:\n1 — Practice\n2 — Form A (Review)\n3 — Form B (Official Quiz)\n\nEnter 1, 2 or 3:');
+    const map = { '1': 'P', '2': 'A', '3': 'B' };
     if (!map[form]) { alert('Invalid choice.'); reviewMode = false; return; }
     const mode = prompt('Choose review mode:\n1 — Manual (tap Next each question)\n2 — Auto-run (fully automatic)\n\nEnter 1 or 2:');
     if (mode !== '1' && mode !== '2') { alert('Invalid choice.'); reviewMode = false; return; }
@@ -797,7 +894,8 @@ const app = {
       return { ...q, choices: shuffled };
     };
     this.currentBank = rawBank.map(shuffleQ);
-    shuffle(this.currentBank);
+    // Practice keeps its order: each number walks the steps in sequence
+    if (!isPractice(form)) shuffle(this.currentBank);
 
     const banner = document.getElementById('review-mode-banner');
     if (banner) {
@@ -824,7 +922,7 @@ const app = {
       if (this.studentName && data.studentName === this.studentName) {
         rc.classList.remove('hidden');
         document.getElementById('resume-detail').textContent =
-          `${data.currentForm === 'A' ? 'Review (Form A)' : 'Official Quiz (Form B)'} — Q${data.currentIndex + 1} of ${data.currentBank.length}`;
+          `${FORM_NAMES[data.currentForm] || 'Official Quiz (Form B)'} — Q${data.currentIndex + 1} of ${data.currentBank.length}`;
         if (formSelect) formSelect.classList.add('hidden');
       } else {
         rc.classList.add('hidden');
@@ -1051,8 +1149,12 @@ const app = {
     // Question text
     const qtEl = document.getElementById('question-text');
     let qHTML = formatMathText(q.q);
-    if (q.hint) qHTML += `<div style="font-size:0.85rem;color:#666;background:#f0f0f0;border-radius:8px;padding:6px 10px;margin-top:8px;">💡 Hint: ${q.hint}</div>`;
+    this.hintShown = false;   // every question starts with the hint closed
+    if (q.hint) qHTML += hintBoxHTML(q.hint, false);
     qtEl.innerHTML = qHTML;
+    // Place-value chart lives outside #question-text, so speakQuestion's
+    // word-wrapping never touches it
+    document.getElementById('q-visual').innerHTML = q.pv ? placeValueHTML(q.pv) : '';
 
     // Reset feedback / buttons
     const fb = document.getElementById('feedback');
@@ -1163,7 +1265,7 @@ const app = {
     // The review (Form A) teaches: the right answer + why, every time.
     // Official quiz (Form B): mark only the student's own pick — the right
     // answer is never shown (the teacher's review mode still sees it).
-    const teach = isReview(this.currentForm) || reviewMode;
+    const teach = teaches(this.currentForm) || reviewMode;
     document.querySelectorAll('.answer-btn').forEach(btn => {
       btn.disabled = true;
       if (btn.dataset.answer === this.selectedAnswer) btn.classList.add(correct ? 'correct' : 'incorrect');
@@ -1279,7 +1381,7 @@ const app = {
     const againBtn = document.getElementById('end-again-btn');
     if (againBtn) againBtn.classList.toggle('hidden', reviewMode);
     document.getElementById('end-title').textContent =
-      isReview(this.currentForm) ? '🎉 Review Complete!' : '🎉 Quiz Complete!';
+      isPractice(this.currentForm) ? '🎉 Practice Complete!' : isReview(this.currentForm) ? '🎉 Review Complete!' : '🎉 Quiz Complete!';
 
     document.getElementById('final-score-sub').textContent =
       `${formLabel(attemptNum)}${attemptNum > 1 ? ' · Attempt ' + attemptNum : ''} · ${this.studentName}`;
@@ -1291,7 +1393,7 @@ const app = {
 
     const missedSec = document.getElementById('missed-section');
     // The review shows the fix for every miss; the official quiz shows the pick only.
-    const showFix = isReview(this.currentForm) || reviewMode;
+    const showFix = teaches(this.currentForm) || reviewMode;
     if (this.missedQuestions.length) {
       missedSec.classList.remove('hidden');
       document.getElementById('missed-items').innerHTML =
@@ -1311,6 +1413,17 @@ const app = {
   },
 
   /* ── SPEAK QUESTION ── */
+  /* 💡 Need a hint? → open the hint box (not read aloud until its own 🔊 is tapped) */
+  showHint() {
+    const q = this.currentBank && this.currentBank[this.currentIndex];
+    const wrap = document.querySelector('#question-text .hint-wrap');
+    if (!q || !q.hint || !wrap) return;
+    this.hintShown = true;
+    wrap.outerHTML = hintBoxHTML(q.hint, true);
+    const btn = document.querySelector('#question-text .hint-speak-btn');
+    if (btn) btn.focus();
+  },
+
   speakQuestion() {
     const qBtn = document.getElementById('speak-q-btn');
     if (activeSpeakBtn === qBtn) { stopActiveSpeech(); return; }
@@ -1329,7 +1442,7 @@ const app = {
     originalWords.forEach((w, i) => {
       qHTML += `<span class="wrd" id="wrd${i}">${formatMathText(w)}</span> `;
     });
-    if (q.hint) qHTML += `<div style="font-size:0.85rem;color:#666;background:#f0f0f0;border-radius:8px;padding:6px 10px;margin-top:8px;">💡 Hint: ${q.hint}</div>`;
+    if (q.hint) qHTML += hintBoxHTML(q.hint, this.hintShown);
     qtEl.innerHTML = qHTML;
 
     const hlSpans = originalWords.map((_, i) => document.getElementById('wrd' + i));
@@ -1370,14 +1483,14 @@ const app = {
     }
     noEl.style.display = 'none';
 
-    const forms = ['A', 'B'];
+    const forms = ['P', 'A', 'B'];
 
     const summaryCards = forms.map(form => {
       const best = all.filter(s => s.form === form && s.done)
         .reduce((b, r) => (!b || r.pct > b.pct) ? r : b, null);
       if (!best) {
         return `<div class="sb-summary-card">
-          <div class="sb-summary-label">Form ${form}</div>
+          <div class="sb-summary-label">${FORM_NAMES[form]}</div>
           <div class="sb-summary-grade" style="color:#ccc;">—</div>
           <div class="sb-summary-score" style="color:#aaa;">Not yet completed</div>
         </div>`;
@@ -1385,7 +1498,7 @@ const app = {
       const grade = letterGrade(best.pct);
       const gc = best.pct>=90?'#27ae60':best.pct>=80?'#2980b9':best.pct>=70?'#f39c12':best.pct>=60?'#e67e22':'#e74c3c';
       return `<div class="sb-summary-card">
-        <div class="sb-summary-label">Form ${form}</div>
+        <div class="sb-summary-label">${FORM_NAMES[form]}</div>
         <div class="sb-summary-grade" style="color:${gc};">${grade}</div>
         <div class="sb-summary-score">${best.score}/${best.total} · ${best.pct}%</div>
         <div class="sb-summary-attempt">Best of ${all.filter(s=>s.form===form&&s.done).length} attempt(s)</div>
@@ -1422,7 +1535,7 @@ const app = {
         </div>`;
       };
 
-      return `<h3 style="color:var(--primary);margin:22px 0 8px;border-bottom:2px solid #e0e0e0;padding-bottom:6px;">Form ${form}</h3>
+      return `<h3 style="color:var(--primary);margin:22px 0 8px;border-bottom:2px solid #e0e0e0;padding-bottom:6px;">${FORM_NAMES[form]}</h3>
         ${buildTable(att1,'Attempt 1','#d35400')}
         ${buildTable(att2,'Attempt 2','#f39c12')}`;
     }).join('');
@@ -1484,7 +1597,7 @@ const app = {
   printResults() {
     const all = JSON.parse(localStorage.getItem(SCORES_KEY) || '[]');
     if (!all.length) { alert('No scores to print yet!'); return; }
-    const rows = ['A','B'].flatMap(form =>
+    const rows = ['P','A','B'].flatMap(form =>
       all.filter(s => s.form === form).map(r => {
         const cc  = r.pct >= 80 ? 'good' : r.pct >= 60 ? 'ok' : 'bad';
         const att = r.attempt || 1;
@@ -1493,7 +1606,7 @@ const app = {
           : 'background:#f39c12;color:#5a3000;padding:2px 7px;border-radius:4px;font-size:0.8em;';
         return `<tr>
           <td>${r.name||'—'}</td>
-          <td>Form ${r.form}</td>
+          <td>${FORM_NAMES[r.form] || 'Form ' + r.form}</td>
           <td><span style="${attStyle}">Attempt ${att}</span></td>
           <td>${r.score}/${r.total}</td>
           <td class="${cc}">${r.pct}%</td>
