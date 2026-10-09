@@ -7,7 +7,29 @@
    the same slot, so review → quiz compares skill by skill.
 ═══════════════════════════════════════════════════════ */
 window.SKILLS = {
-  // Practice (Form P, 10/8): four numbers × five steps, same skill names as the review and quiz
+  // Practice A (Form E, the easy start, 10/8): place names, look digit, up/down, rounding down keeps the digit
+  E01: "Know the place names",
+  E02: "Know the place names",
+  E03: "Know the place names",
+  E04: "Know the place names",
+  E05: "Which digit to look at",
+  E06: "Which digit to look at",
+  E07: "Which digit to look at",
+  E08: "Round up or round down",
+  E09: "Round up or round down",
+  E10: "Round up or round down",
+  E11: "What the rounding digit can become",
+  E12: "Round to tens and hundreds",
+  E13: "What the rounding digit can become",
+  E14: "Round to tens and hundreds",
+  E15: "What the rounding digit can become",
+  E16: "Round to tens and hundreds",
+  E17: "Round to tens and hundreds",
+  E18: "Round to thousands and greater",
+  E19: "Round to tens and hundreds",
+  E20: "Round to thousands and greater",
+
+  // Practice B (Form P, 10/8): four numbers × five steps, same skill names as the review and quiz
   P01: "Find the rounding digit",
   P02: "Which digit to look at",
   P03: "Round up or round down",

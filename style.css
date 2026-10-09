@@ -691,3 +691,10 @@ button.answer-btn.incorrect { background: #f8d7da; border-color: #dc3545; color:
 .part-banner.pb-review     { background: #2471a3; }
 .part-banner.pb-quiz       { background: #a04000; }
 .part-banner .pb-teacher   { font-size: .8rem; font-weight: 700; opacity: .9; }
+
+/* ── PRACTICE A (Form E, the easy start, 10/8) ── */
+.start-btn.practice-a-btn { background: #27ae60; box-shadow: 0 5px 0 #1e8449; }
+.start-btn.practice-a-btn:hover { box-shadow: 0 8px 0 #1e8449; }
+#practice-a-card .step-label { color: #1e8449; }
+.practice-a-dir    { background: #eafaf1; border-color: #82e0aa; }
+.practice-a-dir h3 { color: #1e8449; }
