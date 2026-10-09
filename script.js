@@ -351,7 +351,7 @@ function placeValueHTML(pv) {
 /* ── PART BANNER (Marcos 10/8: "I want to be able to know which part the
    students are on") — a big colored label on top of every question:
    the step number and the part's name, one color per part. ── */
-const PART_BANNER = { P: ['🧭', 'Step 2 · Practice', 'pb-practice'], A: ['📘', 'Step 3 · Review', 'pb-review'], B: ['📝', 'Step 4 · Official Quiz', 'pb-quiz'] };
+const PART_BANNER = { P: ['🧭', 'Step 1 · Practice', 'pb-practice'], A: ['📘', 'Step 2 · Review', 'pb-review'], B: ['📝', 'Step 3 · Official Quiz', 'pb-quiz'] };
 function setPartBanner(form) {
   const el = document.getElementById('part-banner');
   const p = PART_BANNER[form];

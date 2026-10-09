@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rounding Review and Quiz - Mechanics Edition: Round Whole Numbers to Any Place</title>
-  <link rel="stylesheet" href="style.css?v=rq16" />
+  <link rel="stylesheet" href="style.css?v=rq17" />
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
@@ -51,9 +51,9 @@
         </div>
       </div>
 
-      <!-- STEP 1 — SIGN IN -->
+      <!-- SIGN IN (not numbered — the activities are Steps 1, 2, 3 …; Marcos 10/8) -->
       <div class="step-card" id="login-step-card">
-        <span class="step-label">Step 1 — Sign In</span>
+        <span class="step-label">Sign In</span>
         <div class="login-box">
           <label for="name-select">👤 Select your name:</label>
           <select id="name-select" onchange="app.onNameSelect()">
@@ -76,12 +76,12 @@
         </div>
       </div>
 
-      <!-- STEP 2 — PRACTICE (Form P, 10/8) · STEP 3 — REVIEW (Form A) · STEP 4 — THE OFFICIAL QUIZ (Form B; Teacher-PIN retakes) -->
+      <!-- STEP 1 — PRACTICE (Form P, 10/8) · STEP 2 — REVIEW (Form A) · STEP 3 — THE OFFICIAL QUIZ (Form B; Teacher-PIN retakes) -->
       <div id="form-select-section" class="hidden">
 
         <!-- Practice — the digit-rule steps in order, opt-in hints; as many tries as they like -->
         <div class="step-card" id="practice-card">
-          <span class="step-label">Step 2 — Practice</span>
+          <span class="step-label">Step 1 — Practice</span>
           <div class="start-grid">
             <button class="start-btn practice-btn" id="btn-form-P" onclick="app.attemptStart('P')">🧭 Practice<span class="form-btn-sub">20 questions · step by step</span></button>
           </div>
@@ -90,7 +90,7 @@
 
         <!-- Review — 2 tries, then Teacher PIN -->
         <div class="step-card" id="review-card">
-          <span class="step-label">Step 3 — Review</span>
+          <span class="step-label">Step 2 — Review</span>
           <div class="start-grid">
             <button class="start-btn review-btn" id="btn-form-A" onclick="app.attemptStart('A')">📘 Review (Form A)<span class="form-btn-sub">20 questions · 2 tries</span></button>
           </div>
@@ -99,7 +99,7 @@
 
         <!-- Not taken yet → start the official quiz -->
         <div class="step-card" id="quiz-start-card">
-          <span class="step-label">Step 4 — The Official Quiz</span>
+          <span class="step-label">Step 3 — The Official Quiz</span>
           <div class="start-grid">
             <button class="start-btn" id="btn-form-B" onclick="app.attemptStart('B')">📝 Take the Official Quiz (Form B)<span class="form-btn-sub">20 questions · one try</span></button>
           </div>
@@ -184,7 +184,7 @@
     <div class="dir-section login-dir">
       <div class="dir-row">
         <button class="speak-btn" onclick="speakDir(this)">🔊</button>
-        <h3 style="margin:0;">👤 Step 1 — Sign In</h3>
+        <h3 style="margin:0;">👤 Sign In</h3>
       </div>
       <p class="dir-text">Choose your name from the list, then enter your student number and tap Sign In. Guest students will also enter their first name.</p>
     </div>
@@ -192,7 +192,7 @@
     <div class="dir-section practice-dir">
       <div class="dir-row">
         <button class="speak-btn" onclick="speakDir(this)">🔊</button>
-        <h3 style="margin:0;">🧭 Step 2 — Practice</h3>
+        <h3 style="margin:0;">🧭 Step 1 — Practice</h3>
       </div>
       <p class="dir-text">Start here. The practice shows the steps for rounding, one at a time. Find the rounding digit. Find the digit you look at. Round up or round down. Then round. After each answer you will see the right answer and why. If you get stuck, tap the Need a hint button. You can practice as many times as you like.</p>
     </div>
@@ -200,7 +200,7 @@
     <div class="dir-section form-dir">
       <div class="dir-row">
         <button class="speak-btn" onclick="speakDir(this)">🔊</button>
-        <h3 style="margin:0;">📘 Step 3 — Review (Form A)</h3>
+        <h3 style="margin:0;">📘 Step 2 — Review (Form A)</h3>
       </div>
       <p class="dir-text">The review has 20 questions about rounding. After each answer you will see the right answer and why. The review opens after you finish the practice. You get 2 tries on the review.</p>
     </div>
@@ -208,7 +208,7 @@
     <div class="dir-section attempts-dir">
       <div class="dir-row">
         <button class="speak-btn" onclick="speakDir(this)">🔊</button>
-        <h3 style="margin:0;">🔒 Step 4 — The Official Quiz (Form B)</h3>
+        <h3 style="margin:0;">🔒 Step 3 — The Official Quiz (Form B)</h3>
       </div>
       <p class="dir-text">The official quiz opens after you finish the review at least once. It has 20 questions. After each answer you will see if it is correct or not quite, but the right answer is not shown. You take the quiz one time. When you finish, it locks. Only your teacher can unlock a retake, so do your best work the first time.</p>
     </div>
@@ -390,6 +390,6 @@
 <script src="data/form_a.js?v=rq13"></script>
 <script src="data/form_b.js?v=rq13"></script>
 <script src="data/skills.js?v=rq13"></script>
-<script src="script.js?v=rq16"></script>
+<script src="script.js?v=rq17"></script>
 </body>
 </html>
