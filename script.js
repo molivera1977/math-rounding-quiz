@@ -23,6 +23,11 @@
 const PRACTICE_OPEN = true;    // Practice (Marcos 10/8) — the steps, with hints
 const REVIEW_OPEN   = true;    // Form A — Review
 const QUIZ_OPEN     = true;    // Form B — Official Quiz
+// Marcos 10/8: "I want all 4 parts for each site to be accessible whenever.
+// They should be doable in any order." true = no step waits for another;
+// false = the old order locks (Practice A → Practice B → Review → Quiz).
+const ANY_ORDER     = true;
+const gate = ready => ANY_ORDER || ready;
 const INSTRUCT_SECS = 20;
 const READ_SECS     = 12;
 const NEXT_SECS     = 8;
@@ -456,16 +461,16 @@ function applyFormLocks(name) {
     a.E === 0 ? '20 questions · the easy start' : '🔁 Practice again any time');
   setFormButton('P', '🧭 Practice B',
     a.P === 0 ? '20 questions · step by step' : '🔁 Practice again any time',
-    practiceBReady(name) ? '' : 'Finish Practice A first');
+    gate(practiceBReady(name)) ? '' : 'Finish Practice A first');
   setFormButton('A', '📘 Review (Form A)',
     a.A === 0 ? '20 questions · 2 tries'
     : a.A === 1 ? '🔁 Attempt 2 available'
     : '🔒 2/2 attempts used · Teacher PIN for more',
-    reviewReady(name) ? '' : 'Finish Practice B first');
+    gate(reviewReady(name)) ? '' : 'Finish Practice B first');
   const revBtn = document.getElementById('btn-form-A');
-  if (revBtn && formOpen('A') && reviewReady(name) && a.A >= 2) revBtn.classList.add('locked');
+  if (revBtn && formOpen('A') && gate(reviewReady(name)) && a.A >= 2) revBtn.classList.add('locked');
   setFormButton('B', '📝 Take the Official Quiz (Form B)', '20 questions · one try',
-    reviewFinished(name) ? '' : 'Finish the Review (Form A) first');
+    gate(reviewFinished(name)) ? '' : 'Finish the Review (Form A) first');
   if (startCard) startCard.classList.toggle('hidden', done);
   if (doneCard)  doneCard.classList.toggle('hidden', !done || retakeUnlocked);
   if (retake)    retake.classList.toggle('hidden', !retakeUnlocked);
@@ -811,7 +816,7 @@ const app = {
   attemptStart(form) {
     if (!this.studentName || !['E', 'P', 'A', 'B'].includes(form) || !formOpen(form)) return;
     // Practice B waits for Practice A; the Teacher PIN can skip that
-    if (form === 'P' && !practiceBReady(this.studentName)) {
+    if (form === 'P' && !gate(practiceBReady(this.studentName))) {
       this.showPinModal(
         '🌱 Practice A First',
         `${getFirstName(this.studentName)}, finish Practice A before you start Practice B. ` +
@@ -821,7 +826,7 @@ const app = {
       return;
     }
     // The review waits for one finished practice; the Teacher PIN can skip that
-    if (form === 'A' && !reviewReady(this.studentName)) {
+    if (form === 'A' && !gate(reviewReady(this.studentName))) {
       this.showPinModal(
         '🧭 Practice B First',
         `${getFirstName(this.studentName)}, finish Practice B before you start the review. ` +
@@ -833,7 +838,7 @@ const app = {
     // The official quiz is one try — a finished one needs a Teacher-PIN retake
     if (form === 'B' && quizCompleted(this.studentName)) { applyFormLocks(this.studentName); return; }
     // The quiz waits for one finished review; the Teacher PIN can skip that
-    if (form === 'B' && !reviewFinished(this.studentName)) {
+    if (form === 'B' && !gate(reviewFinished(this.studentName))) {
       this.showPinModal(
         '📘 Review First',
         `${getFirstName(this.studentName)}, finish the Review (Form A) before you take the official quiz. ` +
