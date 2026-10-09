@@ -348,6 +348,20 @@ function placeValueHTML(pv) {
   return `<div class="pv-wrap" role="img" aria-label="Place value chart: ${said}">${cells}</div>`;
 }
 
+/* ── PART BANNER (Marcos 10/8: "I want to be able to know which part the
+   students are on") — a big colored label on top of every question:
+   the step number and the part's name, one color per part. ── */
+const PART_BANNER = { P: ['🧭', 'Step 2 · Practice', 'pb-practice'], A: ['📘', 'Step 3 · Review', 'pb-review'], B: ['📝', 'Step 4 · Official Quiz', 'pb-quiz'] };
+function setPartBanner(form) {
+  const el = document.getElementById('part-banner');
+  const p = PART_BANNER[form];
+  if (!el || !p) return;
+  const retake = form === 'B' && !reviewMode && upcomingAttempt() > 1;
+  el.className = 'part-banner ' + p[2];
+  el.innerHTML = `<span aria-hidden="true">${p[0]}</span> ${p[1]}${retake ? ' — Retake' : ''}` +
+    (reviewMode ? ' <span class="pb-teacher">(teacher view)</span>' : '');
+}
+
 /* ── HIGHLIGHT FALLBACK ─────────────────────────────
    Some voices (and some browsers) never fire word-boundary
    events, so the highlight would never move. If no boundary
@@ -1137,6 +1151,7 @@ const app = {
 
   /* ── RENDER QUESTION ── */
   renderQuestion() {
+    setPartBanner(this.currentForm);
     const q     = this.currentBank[this.currentIndex];
     const total = this.currentBank.length;
 
