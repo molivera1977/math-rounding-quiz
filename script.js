@@ -20,6 +20,7 @@
 /* ── CONFIG ─────────────────────────────────────────── */
 // Each form opens on its own. false = students locked out of that form;
 // Teacher Access still works. Set true to open.
+const SHARE_MODE    = !!window.SHARE_MODE;   // set by share.js — a visitor's link, never a student's
 const PRACTICE_OPEN = true;    // Practice (Marcos 10/8) — the steps, with hints
 const REVIEW_OPEN   = true;    // Form A — Review
 const QUIZ_OPEN     = true;    // Form B — Official Quiz
@@ -27,7 +28,7 @@ const QUIZ_OPEN     = true;    // Form B — Official Quiz
 // They should be doable in any order." true = no step waits for another;
 // false = the old order locks (Practice A → Practice B → Review → Quiz).
 const ANY_ORDER     = true;
-const gate = ready => ANY_ORDER || ready;
+const gate = ready => ANY_ORDER || SHARE_MODE || ready;
 const INSTRUCT_SECS = 20;
 const READ_SECS     = 12;
 const NEXT_SECS     = 8;
@@ -46,7 +47,7 @@ const isPractice = form => form === 'E' || form === 'P';
 // Practice and Review teach (answer + why); the official quiz does not
 const teaches = form => form !== 'B';
 const FORM_NAMES = { E: 'Practice A', P: 'Practice B', A: 'Review (Form A)', B: 'Official Quiz (Form B)' };
-function formOpen(form) { return isPractice(form) ? PRACTICE_OPEN : isReview(form) ? REVIEW_OPEN : QUIZ_OPEN; }
+function formOpen(form) { return SHARE_MODE || (isPractice(form) ? PRACTICE_OPEN : isReview(form) ? REVIEW_OPEN : QUIZ_OPEN); }
 /* Sheet / dashboard game key — one per form */
 function gameKey(form) {
   // Practice B keeps the original practice key so the 10/8 attempts stay in the same tab
@@ -701,7 +702,7 @@ const app = {
 
   /* ── READ ALOUD INTRO ── */
   showReadAloudIntro() {
-    if (!REVIEW_OPEN && !QUIZ_OPEN) return;
+    if (!SHARE_MODE && (!REVIEW_OPEN && !QUIZ_OPEN)) return;
     document.getElementById('welcome-panel').classList.add('hidden');
     this.show('readaloud-screen');
     setTimeout(speakReadAloudIntro, 150);   // announces itself (show() just cancelled any speech)
@@ -747,6 +748,18 @@ const app = {
     this.show('start-screen');
     document.getElementById('welcome-panel').classList.add('hidden');
     document.getElementById('student-login-panel').classList.remove('hidden');
+    if (SHARE_MODE) this._shareSignIn();
+  },
+
+  /* Shared preview: no roster, no student number — straight to the parts. */
+  _shareSignIn() {
+    loggedInName     = 'Visitor';
+    this.studentName = 'Visitor';
+    const loginCard = document.getElementById('login-step-card');
+    if (loginCard) loginCard.classList.add('hidden');
+    document.getElementById('form-select-section').classList.remove('hidden');
+    applyFormLocks(this.studentName);
+    this.checkResume();
   },
 
   /* ── NAME SELECT ── */
@@ -1392,11 +1405,11 @@ const app = {
     const date  = new Date();
 
     const scores   = JSON.parse(localStorage.getItem(SCORES_KEY) || '[]');
-    const prevDone = reviewMode ? 0 : scores.filter(s => s.name === this.studentName && s.form === this.currentForm && s.done).length;
+    const prevDone = (reviewMode || SHARE_MODE) ? 0 : scores.filter(s => s.name === this.studentName && s.form === this.currentForm && s.done).length;
     const attemptNum = prevDone + 1;
     this.currentAttemptNum = attemptNum;
 
-    if (!reviewMode) {
+    if (!reviewMode && !SHARE_MODE) {
       scores.push({
         name:    this.studentName,
         form:    this.currentForm,
@@ -1430,8 +1443,9 @@ const app = {
     document.getElementById('end-title').textContent =
       isPractice(this.currentForm) ? `🎉 ${FORM_NAMES[this.currentForm]} Complete!` : isReview(this.currentForm) ? '🎉 Review Complete!' : '🎉 Quiz Complete!';
 
-    document.getElementById('final-score-sub').textContent =
-      `${formLabel(attemptNum)}${attemptNum > 1 ? ' · Attempt ' + attemptNum : ''} · ${this.studentName}`;
+    document.getElementById('final-score-sub').textContent = SHARE_MODE
+      ? `${FORM_NAMES[this.currentForm]} · Shared preview — this score was not saved`
+      : `${formLabel(attemptNum)}${attemptNum > 1 ? ' · Attempt ' + attemptNum : ''} · ${this.studentName}`;
     document.getElementById('final-msg').textContent = msg;
 
     const pctEl = document.getElementById('final-percent');
@@ -1440,7 +1454,7 @@ const app = {
 
     const missedSec = document.getElementById('missed-section');
     // The review shows the fix for every miss; the official quiz shows the pick only.
-    const showFix = teaches(this.currentForm) || reviewMode;
+    const showFix = teaches(this.currentForm) || reviewMode || SHARE_MODE;   // a visitor sees every fix, the test included
     if (this.missedQuestions.length) {
       missedSec.classList.remove('hidden');
       document.getElementById('missed-items').innerHTML =
@@ -1839,7 +1853,7 @@ app.init();
 
 /* ── CLOSED-TO-STUDENTS LOCK ────────────────────────── */
 (function applyReviewLock() {
-  if (REVIEW_OPEN || QUIZ_OPEN) return;   // either form open → students can get in
+  if (SHARE_MODE || REVIEW_OPEN || QUIZ_OPEN) return;   // either form open → students can get in
   const btn = document.querySelector('.lgs-btn');
   if (!btn) return;
   btn.disabled = true;
