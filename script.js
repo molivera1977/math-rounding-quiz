@@ -29,7 +29,7 @@ const QUIZ_OPEN     = true;    // Form B — Official Quiz
 // false = the old order locks (Practice A → Practice B → Review → Quiz).
 const ANY_ORDER     = true;
 const gate = ready => ANY_ORDER || SHARE_MODE || ready;
-const INSTRUCT_SECS = 20;
+const INSTRUCT_SECS = 15;
 const READ_SECS     = 12;
 const NEXT_SECS     = 8;
 const STORAGE_KEY   = 'rndq_session_v1';
@@ -1137,7 +1137,7 @@ const app = {
     if (el) el.textContent = `${m}:${s}`;
   },
 
-  /* ── INSTRUCTIONS LOCK (20s) ── */
+  /* ── INSTRUCTIONS LOCK (15s) ── */
   startInstructionsTimer() {
     if (this.instructInterval) { clearInterval(this.instructInterval); this.instructInterval = null; }
     const btn   = document.getElementById('ready-btn');
